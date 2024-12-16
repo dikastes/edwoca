@@ -1,0 +1,2 @@
+recursive-include edowca/static *
+recursive-include edwoca/templates *
