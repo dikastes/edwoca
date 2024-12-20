@@ -4,16 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "edwoca"
-version = "0.1"
+version = "0.0.1"
 dependencies = [
     "django>=5.1",
+    "dmad-on-django"
 ]
 description = "The editor for work catalogs."
-readme = "README.rst"
-requires-python = ">= 3.10"
+readme = "README.md"
+requires-python = ">= 3.9"
 authors = [
     {name = "Matthias Richter", email = "matthias.richter@slub-dresden.de"},
 ]
+license = {file = "LICENSE"}
 classifiers = [
     "Environment :: Web Environment",
     "Framework :: Django",
