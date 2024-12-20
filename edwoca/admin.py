@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Work
-from .models import Title
+from .models import Title, Work
 
 # Register your models here.
 class TitleInline(admin.TabularInline):
