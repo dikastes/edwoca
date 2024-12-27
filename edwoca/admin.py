@@ -1,12 +1,11 @@
 from django.contrib import admin
-from .models import Title, Work
+from .models import WorkTitle, Work
 
 # Register your models here.
-class TitleInline(admin.TabularInline):
-    model = Title
+class WorkTitleInline(admin.TabularInline):
+    model = WorkTitle
 
 class WorkAdmin(admin.ModelAdmin):
-    #list_display = ('title')
-    inlines = [TitleInline]
+    inlines = [WorkTitleInline]
 
 admin.site.register(Work, WorkAdmin)

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from dmad_on_django.models import Language, Status, Person
@@ -13,6 +14,9 @@ class Work(models.Model):
     work_catalog_number = models.CharField(max_length=20, unique=True, null=True)
     related_work = models.ManyToManyField('Work', through='RelatedWork')
     history = models.TextField()
+
+    def get_absolute_url(self):
+        return reverse('work_detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return '%s: %s' % (self.work_catalog_number, self.titles.get(status=Status.PRIMARY).title)
@@ -90,7 +94,7 @@ class RelatedWork(models.Model):
             self.Label.RELATED
         }
 
-class Title(models.Model):
+class WorkTitle(models.Model):
     class Meta:
         ordering = ['title']
 
