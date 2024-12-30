@@ -1,0 +1,16 @@
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.rawgit.com/ichord/At.js/master/dist/css/jquery.atwho.css" />
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.9.2/dist/paper.min.css" crossorigin="anonymous">
+
+<div class="paper container">
+{% block content %}
+    <p> This is the base template. </p>
+{% endblock %}
+</div>
+
+<!-- jquery.js -->
+<script src="{% static 'edwoca/jquery-3.7.1.min.js' %}"></script>
+<script src="https://cdn.rawgit.com/ichord/Caret.js/master/dist/jquery.caret.min.js"></script>
+<script src="https://cdn.rawgit.com/ichord/At.js/master/dist/js/jquery.atwho.min.js"></script>
+<script src="{% static 'edwoca/editor.js' %}"></script>

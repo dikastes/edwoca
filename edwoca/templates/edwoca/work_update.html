@@ -1,0 +1,30 @@
+{% extends 'edwoca/base.html' %}
+
+{% block content %}
+
+<h1> {{ work.work_catalog_number }}: {{ title }} </h1>
+
+<form method="post">
+	{% csrf_token %}
+	<h2> Basisinformationen </h2>
+	{{ form.as_p }}
+
+	<div id="here">
+	</div>
+
+	<h2> Titelei </h2>
+	{% for work_title_form in work_title_forms %}
+		<h3> {{ work_title_form.title }} </h3>
+		{{ work_title_form.form.as_p }}
+	{% endfor %}
+
+	<h3> Neuer Titel </h3>
+	{{ new_work_title_form }}
+
+	<h2> Relationen </h2>
+
+	<h3> zu Werken </h3>
+
+	<input type="submit" value="ok">
+</form>
+{% endblock %}
