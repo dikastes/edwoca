@@ -94,13 +94,27 @@ class RelatedWork(models.Model):
             self.Label.RELATED
         }
 
-class WorkTitle(models.Model):
+class Title(models.Model):
     class Meta:
         ordering = ['title']
+        abstract = True
 
-    title = models.CharField(max_length=100)
-    status = models.CharField(max_length=1,choices=Status,default=Status.PRIMARY)
-    language = models.CharField(max_length=15, choices=Language, default=Language['DE'])
+    title = models.CharField(
+            max_length = 100
+        )
+    status = models.CharField(
+            max_length = 1,
+            choices = Language,
+            default = Status.PRIMARY
+        )
+    language = models.CharField(
+            max_length = 15,
+            choices = Language,
+            default = Language['DE']
+        )
+
+class WorkTitle(Title):
+
     work = models.ForeignKey('Work', on_delete=models.CASCADE, related_name='titles')
 
     #def is_upperclass(self):
