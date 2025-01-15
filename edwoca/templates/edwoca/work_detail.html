@@ -1,0 +1,86 @@
+{% extends 'edwoca/base.html' %}
+
+{% block content %}
+
+<h1> {{ work.work_catalog_number }}: {{ title }} </h1>
+
+<a href="{% url 'edwoca:index' %}"> zurück </a>
+<a href="{% url 'edwoca:work_update' work.id %}"> bearbeiten </a>
+
+<dl>
+	<dt> GND-ID <dt>
+	<dd> {{ work.gnd_id }} </dd>
+<dl>
+
+<h2> Titel </h2>
+
+<ul>
+	<li>
+		<a href="{% url 'edwoca:work_title_create' work.id %}"> neu </a>
+	</li>
+	{% for title in work.titles.all %}
+	<li>
+		{{ title.title }} ({{ title.language }}, {{ title.status }})
+		<a href="{% url 'edwoca:work_title_update' title.id %}"> bearbeiten </a>
+		<a href="{% url 'edwoca:work_title_delete' title.id %}"> löschen </a>
+	</li>
+	{% endfor %}
+</ul>
+
+<h2> Geschichte </h2>
+
+<p>
+	{{ work.history }}
+</p>
+
+<h2> Relationen </h2>
+
+<h3> zu Werken </h3>
+
+<ul>
+	<li>
+		<a href="{% url 'edwoca:related_work_create' work.id %}"> new </a>
+	</li>
+	{% for related_work in related_work_targets %}
+	<li>
+		{{ related_work.target_work }} ({{ related_work.label}})
+		<a href="{% url 'edwoca:related_work_update' related_work.id %}"> bearbeiten </a>
+		<a href="{% url 'edwoca:related_work_delete' related_work.id %}"> löschen </a>
+		<p>
+			{{ related_work.comment }}
+		</p>
+	</li>
+	{% endfor %}
+</ul>
+
+<h3> von Werken </h3>
+
+<ul>
+	{% for related_work in related_work_sources %}
+	<li>
+		{{ related_work.source_work }} ({{ related_work.type}})
+		<a href="{% url 'edwoca:related_work_update' related_work.id %}"> bearbeiten </a>
+		<a href="{% url 'edwoca:related_work_delete' related_work.id %}"> löschen </a>
+		<p>
+			{{ related_work.comment }}
+		</p>
+	</li>
+	{% endfor %}
+</ul>
+
+<h3> zu Personen </h3>
+
+<ul>
+	<li>
+		<a href="{% url 'edwoca:contributor_create' work.id %}"> new </a>
+	</li>
+	{% for contributor in contributors %}
+	<li>
+		{{ contributor.person }} ({{ contributor.role }})
+		<a href="{% url 'edwoca:contributor_update' contributor.id %}"> bearbeiten </a>
+		<a href="{% url 'edwoca:contributor_delete' contributor.id %}"> löschen </a>
+	</li>
+	{% endfor %}
+</ul>
+
+{% endblock %}
