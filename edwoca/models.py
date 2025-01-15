@@ -10,16 +10,35 @@ class Work(models.Model):
     class Meta:
         ordering = ['work_catalog_number']
 
-    gnd_id = models.CharField(max_length=20, unique=True, null=True)
-    work_catalog_number = models.CharField(max_length=20, unique=True, null=True)
-    related_work = models.ManyToManyField('Work', through='RelatedWork')
+    gnd_id = models.CharField(
+            max_length=20,
+            unique=True,
+            null=True
+        )
+    work_catalog_number = models.CharField(
+            max_length=20,
+            unique=True,
+            null=True
+        )
+    related_work = models.ManyToManyField(
+            'Work',
+            through='RelatedWork'
+        )
     history = models.TextField()
+    contributors = models.ManyToManyField(
+            'dmad.Person',
+            through = 'Contributor'
+        )
 
     def get_absolute_url(self):
-        return reverse('work_detail', kwargs={'pk': self.pk})
+        return reverse('work_detail', kwargs={'pk': self.id})
 
     def __str__(self):
-        return '%s: %s' % (self.work_catalog_number, self.titles.get(status=Status.PRIMARY).title)
+        try:
+            pref_title = self.titles.get(status=Status.PRIMARY).title
+        except:
+            pref_title = '<ohne Titel>'
+        return f"{self.work_catalog_number}: {pref_title}"
 
     def to_mei(self):
         work = ET.Element('work')
@@ -59,12 +78,12 @@ class Contributor(models.Model):
     work = models.ForeignKey(
         'Work',
         on_delete=models.CASCADE,
-        related_name='contributors'
+        #related_name='contributors'
     )
     person = models.ForeignKey(
         'dmad.Person',
         on_delete=models.CASCADE,
-        related_name='contributed_to'
+        #related_name='contributed_to'
     )
     role = models.CharField(max_length=10, choices=Role, default=Role.COMPOSER)
 
@@ -85,7 +104,7 @@ class RelatedWork(models.Model):
 
     source_work = models.ForeignKey('Work',on_delete=models.CASCADE, related_name="source_work_of")
     target_work = models.ForeignKey('Work',on_delete=models.CASCADE, related_name="target_work_of")
-    comment = models.TextField()
+    comment = models.TextField(null=True)
     label = models.CharField(max_length=2,choices=Label,default=Label.PARENT)
 
     def is_upperclass(self):
