@@ -193,7 +193,7 @@ class WorkUpdateView(generic.edit.UpdateView):
 class WorkDeleteView(generic.edit.DeleteView):
     model = Work
     success_url = reverse_lazy('edwoca:index')
-    template_name = 'edwoca:base_form'
+    template_name = 'edwoca/base_form.html'
     context_object_name = 'work'
 
     def get_context_data(self, **kwargs):
