@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from dmad_on_django.models import Language, Status, Person
+from dmad_on_django.models import Language, Status, Person, Period
 from xml.etree import ElementTree as ET
 from iso639 import to_iso639_1
 
@@ -13,32 +13,42 @@ class Work(models.Model):
     gnd_id = models.CharField(
             max_length=20,
             unique=True,
-            null=True
+            null=True,
+            blank=True
         )
     work_catalog_number = models.CharField(
             max_length=20,
             unique=True,
-            null=True
+            null=True,
+            blank=True
         )
     related_work = models.ManyToManyField(
             'Work',
             through='RelatedWork'
         )
-    history = models.TextField()
+    history = models.TextField(
+            null = True,
+            blank = True
+        )
     contributors = models.ManyToManyField(
             'dmad.Person',
-            through = 'Contributor'
+            through = 'WorkContributor'
         )
 
     def get_absolute_url(self):
-        return reverse('work_detail', kwargs={'pk': self.id})
+        return reverse('edwoca:work_detail', kwargs={'pk': self.id})
+
+    def get_alt_titles(self):
+        return ', '.join(alt_title.title for alt_title in self.titles.filter(status=Status.ALTERNATIVE))
+
+    def get_pref_title(self):
+        try:
+            return self.titles.get(status=Status.PRIMARY).title
+        except:
+            return '<ohne Titel>'
 
     def __str__(self):
-        try:
-            pref_title = self.titles.get(status=Status.PRIMARY).title
-        except:
-            pref_title = '<ohne Titel>'
-        return f"{self.work_catalog_number}: {pref_title}"
+        return f"{self.work_catalog_number}: {self.get_pref_title()}"
 
     def to_mei(self):
         work = ET.Element('work')
@@ -67,7 +77,7 @@ class Work(models.Model):
 
         return work
 
-class Contributor(models.Model):
+class WorkContributor(models.Model):
     class Role(models.TextChoices):
         COMPOSER = 'CP', _('Composer')
         WRITER = 'WR', _('Writer')
@@ -97,14 +107,53 @@ class Contributor(models.Model):
 
         return contributor
 
+class ExpressionContributor(models.Model):
+    class Role(models.TextChoices):
+        COMPOSER = 'CP', _('Composer')
+        WRITER = 'WR', _('Writer')
+        TRANSLATOR = 'TR', _('Translator')
+        POET = 'PT', _('Poet')
+        DEDICATEE = 'DD', _('Dedicatee')
+
+    expression = models.ForeignKey(
+        'Expression',
+        on_delete=models.CASCADE
+    )
+    person = models.ForeignKey(
+        'dmad.Person',
+        on_delete=models.CASCADE
+    )
+    role = models.CharField(max_length=10, choices=Role, default=Role.COMPOSER)
+
+    def to_mei(self):
+        contributor = ET.Element('persName')
+        contributor.attrib['role'] = self.role
+        contributor.attrib['auth'] = 'GND'
+        contributor.attrib['auth.uri'] = 'd-nb.info/gnd'
+        contributor.attrib['codedval'] = self.person.gnd_id
+        contributor.text = self.person.name
+
+        return contributor
+
 class RelatedWork(models.Model):
     class Label(models.TextChoices):
         PARENT = 'PR', _('Parent')
         RELATED = 'RE', _('Related')
 
-    source_work = models.ForeignKey('Work',on_delete=models.CASCADE, related_name="source_work_of")
-    target_work = models.ForeignKey('Work',on_delete=models.CASCADE, related_name="target_work_of")
-    comment = models.TextField(null=True)
+    source_work = models.ForeignKey(
+            'Work',
+            on_delete=models.CASCADE,
+            related_name="source_work_of"
+        )
+    target_work = models.ForeignKey(
+            'Work',
+            on_delete=models.CASCADE,
+            related_name="target_work_of"
+        )
+    comment = models.TextField(
+            null=True,
+            blank=True
+        )
     label = models.CharField(max_length=2,choices=Label,default=Label.PARENT)
 
     def is_upperclass(self):
@@ -142,3 +191,69 @@ class WorkTitle(models.Model):
         title.text = self.title
         title.attrib['lang'] = to_iso639_1(self.language)
         return title
+
+class Expression(models.Model):
+    incipit_music = models.TextField()
+    incipit_text = models.TextField()
+    period = models.OneToOneField(
+            'dmad.Period',
+            on_delete=models.SET_NULL,
+            null = True,
+            blank = True,
+            related_name = 'expression'
+        )
+    period_comment = models.TextField()
+    history = models.TextField()
+    contributors = models.ManyToManyField(
+            'dmad.Person',
+            through = 'ExpressionContributor'
+        )
+    work = models.ForeignKey(
+            'Work',
+            on_delete=models.CASCADE,
+            null=True,
+            blank=True,
+            related_name='expressions'
+        )
+
+    def __str__(self):
+        try:
+            pref_title = self.titles.get(status=Status.PRIMARY).title
+        except:
+            pref_title = '<ohne Titel>'
+        return pref_title
+
+class ExpressionTitle(models.Model):
+    class Meta:
+        ordering = ['title']
+
+    title = models.CharField(
+            max_length=100
+        )
+    status = models.CharField(
+            max_length=1,
+            choices=Status,
+            default=Status.PRIMARY
+        )
+    language = models.CharField(
+            max_length=15,
+            choices=Language,
+            default=Language['DE']
+        )
+    expression = models.ForeignKey(
+            'Expression',
+            on_delete=models.CASCADE,
+            related_name='titles'
+        )
+
+    def __str__(self):
+        return self.title
+
+    def to_mei(self):
+        title = ET.Element('title')
+        if self.status == Status.ALTERNATIVE:
+            title.attrib['type'] = 'alternative'
+        title.text = self.title
+        title.attrib['lang'] = to_iso639_1(self.language)
+        return title
+
