@@ -1,11 +1,4 @@
-from .models import WorkTitle
-from django.forms import ModelForm
+from django.forms.renderers import TemplatesSetting
 
-class WorkTitleForm(ModelForm):
-    class Meta:
-        model = WorkTitle
-        fields = [
-                'title',
-                'status',
-                'language'
-            ]
+class EdwocaFormRenderer(TemplatesSetting):
+    form_template_name = 'edwoca/form_snippet.html'
