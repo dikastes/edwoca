@@ -1,16 +1,39 @@
 {% extends 'edwoca/base.html' %}
 
 {% block content %}
-<h1> Work list </h1>
 
-<a href="{% url 'edwoca:work_create' %}"> new </a>
-<ul>
-	{% for work in work_list %}
-		<li>
-			<a href="{% url 'edwoca:work_detail' work.id %}">
-				{{ work }}
-			</a>
-		</li>
-	{% endfor %}
-</ul>
+<div class="stats">
+	<div class="stat">
+		<div class="stat-title"> Werke </div>
+		<div class="stat-value text-primary"> 2312 </div>
+		<div class="stat-desc"> mit 3421 Fassungen </div>
+	</div>
+</div>
+
+<div role="tablist" class="tabs tabs-bordered my-10">
+	<input type="radio" name="work-source-toggle" role="tab" class="tab" aria-label="Werke" checked="checked"/>
+	<div role="tabpanel" class="tab-content py-10">
+		<a href="{% url 'edwoca:work_create' %}" class="btn btn-primary"> neues Werk </a>
+		{% for work in work_list %}
+		<div class="card shadow mt-5">
+			<div class="card-body">
+				<h2 class="card-title mt-0"> {{ work.get_pref_title }} </h2>
+				<p>
+					LQWV {{ work.work_catalog_number }}, 
+					<a href="https://g-nd.info/gnd/{{ work.gnd_id }}" target="_blank">GND {{ work.gnd_id }}</a>,
+					{{ work.get_alt_titles }}
+				</p>
+				<div class="card-actions justify-end">
+					<a href="{% url 'edwoca:work_detail' work.id %}" class="btn btn-primary"> ansehen </a>
+					<a href="{% url 'edwoca:work_delete' work.id %}" class="btn"> löschen </a>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<input type="radio" name="work-source-toggle" role="tab" class="tab" aria-label="Quellen"/>
+	<div role="tabpanel" class="tab-content">
+		quellen
+	</div>
+</div>
 {% endblock %}
