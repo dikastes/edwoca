@@ -7,7 +7,6 @@ from django.forms import HiddenInput
 from .models import Work, WorkTitle, RelatedWork, WorkContributor, Expression, ExpressionContributor, ExpressionTitle
 from dmad_on_django.models import Status, Person, Period
 from dmad_on_django.forms import PeriodForm
-from .forms import WorkTitleForm
 from json import dumps as json_dump
 
 
@@ -182,9 +181,6 @@ class WorkUpdateView(generic.edit.UpdateView):
     template_name = 'edwoca/base_form.html'
     context_object_name = 'work'
 
-    #def get_success_url(self):
-        #return reverse_lazy('edwoca:work_detail', kwargs = {'pk': self.object.id})
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['view_title'] = f"Werk { self.object } bearbeiten"
@@ -197,8 +193,16 @@ class WorkUpdateView(generic.edit.UpdateView):
 class WorkDeleteView(generic.edit.DeleteView):
     model = Work
     success_url = reverse_lazy('edwoca:index')
-    template_name_suffix = '_delete'
+    template_name = 'edwoca:base_form'
     context_object_name = 'work'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['view_title'] = f"Werk {self.object} löschen"
+        context['button_label'] = "löschen"
+        context['return_target'] = 'edwoca:index'
+        context['return_pk'] = None
+        return context
 
 
 class WorkTitleView(generic.edit.ModelFormMixin):
